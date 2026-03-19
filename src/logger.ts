@@ -1,0 +1,13 @@
+import pino from "pino";
+
+export const logger = pino({
+  level: "debug",
+  transport: {
+    target: "pino-pretty",
+    options: {
+      translateTime: "HH:MM:ss",
+      ignore: "pid,hostname",
+      colorize: true,
+    },
+  },
+});
