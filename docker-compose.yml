@@ -1,0 +1,22 @@
+services:
+  localdb:
+    image: postgres:18.3
+    ports:
+      - "5434:5432"
+    volumes:
+      - .bd-skoob-local:/app-db-dumps
+    environment:
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=${DB_PASS_LOCAL}
+      - POSTGRES_DB=skoobLocal
+
+  testdb:
+    image: postgres:18.3
+    ports:
+      - "5435:5432"
+    volumes:
+      - .bd-skoob-local-test:/app-db-dumps
+    environment:
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=${DB_PASS_TEST}
+      - POSTGRES_DB=skoobLocalTest
