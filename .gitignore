@@ -1,3 +1,6 @@
 node_modules
 .env
 .dist
+generated
+.bd-skoob-local
+.bd-skoob-local-test

@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum BookFormat {
+  FISICO
+  EBOOK
+  AUDIOBOOK
+}
+
+enum ReadingStatus {
+  LIDO
+  LENDO
+  QUERO_LER
+  RELENDO
+  ABANDONEI
+}
+
+model User {
+  id       String     @id @default(uuid())
+  name     String
+  email    String     @unique
+  password String
+  books    UserBook[]
+}
+
+model Book {
+  id          String     @id @default(uuid())
+  title       String
+  author      String
+  publishedAt DateTime
+  genre       String
+  userBooks   UserBook[]
+}
+
+model UserBook {
+  id          String        @id @default(uuid())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId      String
+  book        Book          @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  status      ReadingStatus @default(QUERO_LER)
+  isFavorite  Boolean       @default(false)
+  isDesired   Boolean       @default(false)
+  isOwned     Boolean       @default(false)
+  isLoaned    Boolean       @default(false)
+  format      BookFormat    @default(FISICO)
+  currentPage Int           @default(0)
+  rating      Decimal?      @db.Decimal(2, 1)
+  review      String?       @db.Text
+  isInGoal    Boolean       @default(false)
+
+  @@unique([userId, bookId])
+  @@index([userId, status])
+  @@index([userId, isFavorite])
+}
