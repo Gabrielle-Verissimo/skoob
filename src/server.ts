@@ -1,22 +1,36 @@
-import Fastify from "fastify";
-import { createSchema, createYoga } from "graphql-yoga";
-
-const schema = createSchema({
-  typeDefs: /* GraphQL */ `
-    type Query {
-      hello: String
-    }
-  `,
-  resolvers: {
-    Query: {
-      hello: () => "Olá do Fastify + Yoga!",
-    },
-  },
-});
-
-const yoga = createYoga({ schema });
+import Fastify, { type FastifyReply, type FastifyRequest } from "fastify";
+import { createYoga } from "graphql-yoga";
+import type { MyContext } from "./graphql/builder";
+import type { User } from "./graphql/modules/user/user.model";
+import { schema } from "./graphql/schema";
+import { verifyToken } from "./utils/jwt";
 
 const app = Fastify();
+
+const yoga = createYoga<{ req: FastifyRequest; reply: FastifyReply }, MyContext>({
+  schema: schema,
+  context: async ({ req, reply }) => {
+    const authHeader = req.headers.authorization;
+    let user: User | undefined;
+
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.split(" ")[1];
+
+      if (token) {
+        user = verifyToken(token) as User;
+      }
+    }
+
+    if (user) {
+      return { req, reply, user };
+    }
+
+    return {
+      req,
+      reply,
+    };
+  },
+});
 
 app.route({
   url: "/graphql",
