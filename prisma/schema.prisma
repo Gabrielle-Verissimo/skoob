@@ -5,7 +5,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum BookFormat {
@@ -23,11 +22,12 @@ enum ReadingStatus {
 }
 
 model User {
-  id       String     @id @default(uuid())
-  name     String
-  email    String     @unique
-  password String
-  books    UserBook[]
+  id        String     @id @default(uuid())
+  name      String
+  user_name String     @unique
+  email     String     @unique
+  password  String
+  books     UserBook[]
 }
 
 model Book {
