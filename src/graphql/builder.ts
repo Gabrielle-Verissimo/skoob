@@ -1,7 +1,9 @@
 import SchemaBuilder from "@pothos/core";
 import ScopeAuthPlugin from "@pothos/plugin-scope-auth";
+import ZodPlugin from "@pothos/plugin-zod";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { GraphQLError } from "graphql";
+import { type ZodError, z } from "zod";
 
 export interface MyContext {
   req: FastifyRequest;
@@ -15,8 +17,19 @@ export const builder = new SchemaBuilder<{
     loggedIn: boolean;
   };
 }>({
-  plugins: [ScopeAuthPlugin],
+  plugins: [ScopeAuthPlugin, ZodPlugin],
+  zod: {
+    validationError: (zodError: ZodError, _args, _context, _info) => {
+      const errorMessage = zodError.issues[0]?.message;
 
+      return new GraphQLError(errorMessage as string, {
+        extensions: {
+          //code: "BAD_USER_INPUT",
+          zodErrors: z.treeifyError(zodError),
+        },
+      });
+    },
+  },
   scopeAuth: {
     authScopes: async context => ({
       loggedIn: !!context.user,

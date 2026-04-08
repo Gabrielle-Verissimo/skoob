@@ -13,3 +13,17 @@ export interface User {
   id: string;
   email: string;
 }
+
+export interface UserResponse {
+  id: string;
+  name: string;
+  userName: string;
+  email: string;
+}
+
+export interface RegisterInput {
+  name: string;
+  userName: string;
+  email: string;
+  password: string;
+}
