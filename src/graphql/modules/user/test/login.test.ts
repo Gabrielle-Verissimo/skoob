@@ -1,19 +1,21 @@
 import { describe, expect, test, vi } from "vitest";
+import { prismaMock } from "../../../../../lib/prisma.mock";
+import { verifyPassword } from "../../../../utils/hash";
 import { generateToken } from "../../../../utils/jwt";
 import { PrismaFindByEmail } from "../user.repository";
 import { login } from "../user.service";
-
-vi.mock("../user.repository", () => ({
-  PrismaFindByEmail: vi.fn(),
-}));
 
 vi.mock("../../../../utils/jwt", () => ({
   generateToken: vi.fn(() => "token-falso-123"),
 }));
 
+vi.mock("../../../../utils/hash", () => ({
+  verifyPassword: vi.fn(),
+}));
+
 describe("User Login", () => {
   test("should return a token if login successfully with correct credentials", async () => {
-    vi.mocked(PrismaFindByEmail).mockResolvedValue({
+    prismaMock.user.findUnique.mockResolvedValue({
       id: "123",
       name: "João Silva",
       email: "joao@email.com",
@@ -24,6 +26,7 @@ describe("User Login", () => {
       password: "senha-super-secreta",
       rememberMe: true,
     };
+    vi.mocked(verifyPassword).mockResolvedValue(true);
 
     const response = await login(input);
 
@@ -36,7 +39,7 @@ describe("User Login", () => {
   });
 
   test("should throw UserError if user is not found", async () => {
-    vi.mocked(PrismaFindByEmail).mockResolvedValue(null);
+    prismaMock.user.findUnique.mockResolvedValue(null);
     const input = {
       email: "naoexiste@email.com",
       password: "senhaqualquer",
@@ -57,6 +60,7 @@ describe("User Login", () => {
       email: "joao@email.com",
       password: "senha-errada-digitada",
     };
+    vi.mocked(verifyPassword).mockResolvedValue(false);
 
     await expect(login(input)).rejects.toThrow("Falha no login");
   });

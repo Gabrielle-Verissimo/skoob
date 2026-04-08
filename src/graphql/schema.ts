@@ -11,6 +11,7 @@ builder.mutationType({
   },
 });
 
+import "./modules/books/book.schema";
 import "./modules/user/user.schema";
 
 export const schema = builder.toSchema();

@@ -1,7 +1,8 @@
 import { builder } from "../../builder";
-import { LoginInput } from "./user.input";
-import { LoginRef } from "./user.objectRef";
-import { login } from "./user.service";
+import { registerInputSchema } from "./user.dto";
+import { LoginInput, RegisterInput } from "./user.input";
+import { LoginRef, RegisterUserRef } from "./user.objectRef";
+import { login, register } from "./user.service";
 
 builder.queryFields(t => ({
   hello: t.string({
@@ -17,5 +18,14 @@ builder.mutationFields(t => ({
       input: t.arg({ type: LoginInput, required: true }),
     },
     resolve: async (_parent, args) => login(args.input),
+  }),
+
+  register: t.field({
+    skipTypeScopes: true,
+    type: RegisterUserRef,
+    args: {
+      input: t.arg({ type: RegisterInput, required: true, validate: { schema: registerInputSchema } }),
+    },
+    resolve: async (_parent, args) => register(args.input),
   }),
 }));
